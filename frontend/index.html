@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Vertex AI Live Inference</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      background: #fafafa; 
+      margin: 0; 
+      padding: 20px;
+    }
+    h2 { color: #333; }
+    #frame { 
+      max-width: 80%; 
+      border: 2px solid #ccc; 
+      margin-top: 10px; 
+      border-radius: 8px;
+    }
+    pre {
+      background: #eee;
+      padding: 12px;
+      border-radius: 8px;
+      width: 80%;
+      margin: 10px auto;
+      text-align: left;
+      max-height: 300px;
+      overflow: auto;
+    }
+    .status {
+      margin: 10px;
+      padding: 5px 15px;
+      background: #d1ffd1;
+      display: inline-block;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔮 Live Vertex AI Inference Output</h2>
+  <div class="status" id="status">Connecting...</div>
+  <img id="frame" src="" alt="Live Frame"/>
+  <pre id="output">Waiting for data...</pre>
+
+  <script>
+    const ws = new WebSocket("ws://127.0.0.1:8005/ws"); // Update port if needed
+    const statusEl = document.getElementById("status");
+    const outputEl = document.getElementById("output");
+    const frameEl = document.getElementById("frame");
+
+    ws.onopen = () => { 
+      statusEl.innerText = "🟢 Connected"; 
+    };
+    
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        // Show JSON inference result
+        if (data.result) {
+          outputEl.textContent = JSON.stringify(data.result, null, 2);
+        }
+
+        // Render frame if present
+        if (data.frame) {
+          frameEl.src = "data:image/jpeg;base64," + data.frame;
+        }
+      } catch (err) {
+        console.error("Error parsing WebSocket data:", err);
+      }
+    };
+
+    ws.onclose = () => { 
+      statusEl.innerText = "🔴 Disconnected"; 
+    };
+
+    ws.onerror = (err) => {
+      console.error("WebSocket error:", err);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+httpx
+asyncpg
+python-dotenv
+opencv-python
+websockets
